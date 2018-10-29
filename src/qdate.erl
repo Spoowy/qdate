@@ -293,7 +293,7 @@ to_date(ToTZ, Disambiguate, RawDate)  ->
         {{Year, Month, Date},{Hour,Minute,Second,_Millis}} ->
             date_tz_to_tz({{Year, Month, Date},{Hour,Minute,Second}}, Disambiguate, FromTZ, ToTZ)
     catch
-        _:_ ->
+        _:_:_ ->
             case raw_to_date(RawDate) of
                 D2={{_,_,_},{_,_,_}} ->
                     date_tz_to_tz(D2, Disambiguate, ?DETERMINE_TZ, ToTZ)
@@ -560,7 +560,7 @@ sort(Op, List, Opts) ->
 add_sort_normalization(List, NonDateOpt) ->
     lists:map(fun(Date) ->
         Sortable = try to_unixtime(Date)
-                   catch _:_ when NonDateOpt=/=crash ->
+                   catch _:_:_ when NonDateOpt=/=crash ->
                         {non_date, Date}
                    end,
         {Sortable, Date}
@@ -1076,8 +1076,7 @@ try_parsers(RawDate,[{ParserKey,Parser}|Parsers]) ->
         Other ->
             throw({invalid_parser_return_value,[{parser_key,ParserKey},{return,Other}]})
     catch
-        Error:Reason -> 
-            Stacktrace = erlang:get_stacktrace(),
+        Error:Reason:Stachtrace -> 
             throw({error_in_parser,[{error,{Error,Reason}},{parser_key,ParserKey}, {stacktrace, Stacktrace}]})
     end.
 
@@ -1361,7 +1360,7 @@ compressed_parser(List) when length(List)==8 ->
                 false -> undefined
             end
     catch
-        _:_ -> undefined
+        _:_:_ -> undefined
     end;
 compressed_parser(_) -> 
     undefined.
@@ -1376,7 +1375,7 @@ microsoft_parser(FloatDate) when is_float(FloatDate) ->
         Time = calendar:seconds_to_time(Seconds),
         {Date,Time}
     catch
-        _:_ -> undefined
+        _:_:_ -> undefined
     end;
 microsoft_parser(_) ->
     undefined.
